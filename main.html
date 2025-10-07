@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Teachy Witchy Player</title>
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+  <style>
+    body {
+      margin: 0;
+      background: #0a0014;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      border: none;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <video id="player" playsinline muted autoplay>
+    <source id="video-source" type="video/mp4" />
+  </video>
+
+  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+  <script>
+    let config = {};
+
+    // Получаем настройки из Genially
+    window.addEventListener('message', async (event) => {
+      if (event.data.type === 'init') {
+        config = event.data.config || {};
+        if (config.publicLink) {
+          loadVideo(config.publicLink, config);
+        }
+      }
+    });
+
+    async function loadVideo(publicLink, options) {
+      try {
+        const apiUrl = "https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key=" + encodeURIComponent(publicLink);
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+        if (data.href) {
+          const video = document.getElementById("player");
+          document.getElementById("video-source").src = data.href;
+
+          if (options.loop) video.setAttribute("loop", "true");
+
+          const controls = options.hideUI ? [] : ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'];
+
+          const player = new Plyr('#player', {
+            autoplay: true,
+            muted: true,
+            controls: controls,
+            ratio: '16:9'
+          });
+
+          player.play().catch(() => {
+            console.log("Автовоспроизведение заблокировано браузером.");
+          });
+        } else {
+          document.body.innerHTML = "<p style='color:white'>Ошибка: видео не найдено</p>";
+        }
+      } catch (err) {
+        console.error("Ошибка загрузки видео:", err);
+        document.body.innerHTML = "<p style='color:white'>Ошибка загрузки</p>";
+      }
+    }
+  </script>
+</body>
+</html>
