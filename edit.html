@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Teachy Witchy Player — Настройки</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0a0014;
+      color: #eee;
+      padding: 20px;
+    }
+    label {
+      display: block;
+      margin: 10px 0;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #b84cff;
+      background: #1a0028;
+      color: #eee;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: #b84cff;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>Teachy Witchy Player ✨</h2>
+  <label for="link">Ссылка с Яндекс.Диска:</label>
+  <input type="text" id="link" placeholder="https://disk.yandex.ru/i/....">
+
+  <label>
+    <input type="checkbox" id="hideUI"> Спрятать интерфейс
+  </label>
+  <label>
+    <input type="checkbox" id="loop"> Зациклить видео
+  </label>
+
+  <button onclick="save()">Сохранить</button>
+
+  <script>
+    function save() {
+      const value = document.getElementById('link').value;
+      const hideUI = document.getElementById('hideUI').checked;
+      const loop = document.getElementById('loop').checked;
+      parent.postMessage({ 
+        type: 'setConfig', 
+        config: { 
+          publicLink: value,
+          hideUI: hideUI,
+          loop: loop
+        } 
+      }, '*');
+    }
+
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'getConfig') {
+        if (event.data.config) {
+          if (event.data.config.publicLink) {
+            document.getElementById('link').value = event.data.config.publicLink;
+          }
+          if (event.data.config.hideUI) {
+            document.getElementById('hideUI').checked = true;
+          }
+          if (event.data.config.loop) {
+            document.getElementById('loop').checked = true;
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
